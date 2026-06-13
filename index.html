@@ -48,6 +48,7 @@
           <button id="mistakesButton" class="button" type="button">Mistakes</button>
         </div>
         <p id="dailyStatus" class="daily-status" hidden></p>
+        <p id="versionLabel" class="version-label"></p>
       </section>
 
       <section id="gameScreen" class="screen" aria-labelledby="gameTitle">
@@ -91,6 +92,22 @@
             </div>
           </dl>
           <button id="nextButton" class="button" type="button">Next</button>
+        </section>
+
+        <section id="resultsPanel" class="results-panel" hidden>
+          <p class="result-text correct">Quiz complete!</p>
+          <dl class="facts">
+            <div>
+              <dt>Final score</dt>
+              <dd id="finalScoreText"></dd>
+            </div>
+            <div>
+              <dt>Accuracy</dt>
+              <dd id="finalAccuracyText"></dd>
+            </div>
+          </dl>
+          <button id="playAgainButton" class="button button-primary" type="button">Play again</button>
+          <button id="resultsHomeButton" class="button" type="button">Home</button>
         </section>
       </section>
 

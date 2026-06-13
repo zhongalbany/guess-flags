@@ -198,6 +198,14 @@ h2 {
   text-align: center;
 }
 
+.version-label {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: center;
+}
+
 .button,
 .icon-button {
   border: 0;
@@ -321,6 +329,7 @@ h2 {
 }
 
 .study-panel,
+.results-panel,
 .panel-list {
   display: grid;
   gap: 12px;
@@ -361,6 +370,11 @@ h2 {
   margin-top: 10px;
 }
 
+#gameScreen .results-panel {
+  gap: 8px;
+  margin-top: 10px;
+}
+
 #gameScreen .result-text {
   padding: 12px 14px;
 }
@@ -369,7 +383,8 @@ h2 {
   gap: 6px;
 }
 
-.study-panel[hidden] {
+.study-panel[hidden],
+.results-panel[hidden] {
   display: none;
 }
 

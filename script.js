@@ -1,4 +1,5 @@
 const DATA_URL = "data/countries.json";
+const APP_VERSION = "v1.0.3";
 const STORAGE_KEYS = {
   stats: "guessFlags.stats",
   mistakes: "guessFlags.mistakes",
@@ -17,6 +18,7 @@ const regionSelect = document.getElementById("regionSelect");
 const chineseModeToggle = document.getElementById("chineseModeToggle");
 const dailyButton = document.getElementById("dailyButton");
 const dailyStatus = document.getElementById("dailyStatus");
+const versionLabel = document.getElementById("versionLabel");
 const flagDisplay = document.getElementById("flagDisplay");
 const answerForm = document.getElementById("answerForm");
 const answerInput = document.getElementById("answerInput");
@@ -24,10 +26,13 @@ const suggestions = document.getElementById("suggestions");
 const submitButton = document.getElementById("submitButton");
 const nextButton = document.getElementById("nextButton");
 const studyPanel = document.getElementById("studyPanel");
+const resultsPanel = document.getElementById("resultsPanel");
 const resultText = document.getElementById("resultText");
 const factCountry = document.getElementById("factCountry");
 const factCapital = document.getElementById("factCapital");
 const factContinent = document.getElementById("factContinent");
+const finalScoreText = document.getElementById("finalScoreText");
+const finalAccuracyText = document.getElementById("finalAccuracyText");
 const scoreText = document.getElementById("scoreText");
 const gameModeLabel = document.getElementById("gameModeLabel");
 const statsContent = document.getElementById("statsContent");
@@ -58,6 +63,7 @@ let settings = loadFromStorage(STORAGE_KEYS.settings, { chineseMode: false });
 let dailyScores = loadFromStorage(STORAGE_KEYS.daily, {});
 let chineseMode = Boolean(settings.chineseMode);
 chineseModeToggle.checked = chineseMode;
+versionLabel.textContent = APP_VERSION;
 
 function isChineseModeOn() {
   return chineseModeToggle.checked;
@@ -121,6 +127,17 @@ function countriesForSelectedRegion() {
   return countries.filter((country) => country.continent === region);
 }
 
+function shuffledCountries(list) {
+  const shuffled = list.slice();
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = temp;
+  }
+  return shuffled;
+}
+
 function startGame(mode) {
   gameMode = mode;
   const mistakeIds = Object.keys(mistakes);
@@ -132,7 +149,7 @@ function startGame(mode) {
   } else {
     currentPool = mode === "mistakes"
       ? countries.filter((country) => mistakeIds.includes(country.code))
-      : countriesForSelectedRegion();
+      : shuffledCountries(countriesForSelectedRegion());
   }
 
   if (!currentPool.length) {
@@ -156,9 +173,19 @@ function nextQuestion() {
     return;
   }
 
-  currentCountry = gameMode === "daily"
-    ? currentPool[dailyIndex++]
-    : currentPool[Math.floor(Math.random() * currentPool.length)];
+  if (gameMode === "normal" && questionNumber >= currentPool.length) {
+    showNormalResults();
+    return;
+  }
+
+  if (gameMode === "daily") {
+    currentCountry = currentPool[dailyIndex++];
+  } else if (gameMode === "normal") {
+    currentCountry = currentPool[questionNumber];
+  } else {
+    currentCountry = currentPool[Math.floor(Math.random() * currentPool.length)];
+  }
+
   questionNumber += 1;
   hasAnsweredCurrentFlag = false;
   flagDisplay.textContent = currentCountry.flag;
@@ -168,6 +195,7 @@ function nextQuestion() {
   submitButton.hidden = false;
   suggestions.innerHTML = "";
   studyPanel.hidden = true;
+  resultsPanel.hidden = true;
   nextButton.textContent = "Next";
   updateScore();
   window.setTimeout(() => answerInput.focus(), 80);
@@ -228,6 +256,25 @@ function showStudyMode(correct) {
     saveDailyResult();
     nextButton.textContent = "Finish";
   }
+  if (gameMode === "normal" && score.attempted >= currentPool.length) {
+    nextButton.textContent = "See Results";
+  }
+  updateScore();
+}
+
+function showNormalResults() {
+  currentCountry = null;
+  hasAnsweredCurrentFlag = true;
+  flagDisplay.textContent = "🏁";
+  answerInput.value = "";
+  answerInput.disabled = true;
+  submitButton.disabled = true;
+  submitButton.hidden = true;
+  suggestions.innerHTML = "";
+  studyPanel.hidden = true;
+  resultsPanel.hidden = false;
+  finalScoreText.textContent = `${score.correct} / ${score.attempted}`;
+  finalAccuracyText.textContent = accuracy(score.correct, score.attempted);
   updateScore();
 }
 
@@ -405,6 +452,8 @@ answerForm.addEventListener("submit", (event) => {
 
 answerInput.addEventListener("input", renderSuggestions);
 nextButton.addEventListener("click", nextQuestion);
+document.getElementById("playAgainButton").addEventListener("click", () => startGame("normal"));
+document.getElementById("resultsHomeButton").addEventListener("click", () => showScreen("home"));
 practiceMistakesButton.addEventListener("click", () => startGame("mistakes"));
 chineseModeToggle.addEventListener("change", () => {
   chineseMode = chineseModeToggle.checked;

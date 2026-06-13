@@ -1,4 +1,4 @@
-const CACHE_NAME = "guess-flags-v15";
+const CACHE_NAME = "guess-flags-v17";
 
 const APP_FILES = [
   "./",
